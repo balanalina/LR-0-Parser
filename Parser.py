@@ -31,9 +31,9 @@ class Parser:
             print("Enter command: ")
             command = int(input())
             if command == 1:
-                print(self.grammar.get_non_terminals() + "\n")
+                print(str(self.grammar.get_non_terminals()) + "\n")
             elif command == 2:
-                print(self.grammar.get_terminals() + "\n")
+                print(str(self.grammar.get_terminals()) + "\n")
             elif command == 3:
                 for key in self.grammar.production.keys():
                     prod = str(key) + " -> "
@@ -42,7 +42,12 @@ class Parser:
                     print(prod)
                 print("\n")
             elif command == 4:
-                pass
+                print("Enter non-terminal: ")
+                non_term = input()
+                prod = non_term + " -> "
+                for value in self.grammar.production[non_term]:
+                    prod += value + " | "
+                print(prod + "\n")
             elif command == 5:
                 pass
             else:
