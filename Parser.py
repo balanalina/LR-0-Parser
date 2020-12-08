@@ -7,9 +7,11 @@ class Parser:
         self.states = []
         self.C = []
 
-    def goto(self, state, symbol):
-        sym_index = state.split("->")[1].find(symbol) + len(state.split("->")[0]) + 2
-        if state[sym_index - 1] is '.':
+    def goto(self, state, symbol_index):
+        symbol = state[symbol_index]
+        if state[symbol_index - 1] != '.':
+            return []
+        if state[symbol_index - 1] is '.':
             state = state.replace('.', '')
             state = state.replace(symbol, symbol + '.')
             if state[1] is '.':
@@ -35,23 +37,26 @@ class Parser:
             isChanged = False
             for state in self.C:
                 for i in state:
-                    for symbol in i.split("->")[1]:
-                        if symbol is not '.':
-                            if self.goto(i, symbol) is not []:
-                                if self.unique_state(state, self.goto(i, symbol)):
-                                    self.C.append(self.goto(i, symbol))
+                    for ind in range(len(i.split("->")[1])):
+                        index = ind + len(i.split("->")[0]) + 2
+                        if i[index] is not '.':
+                            if self.goto(i, index):
+                                #if self.unique_state( self.goto(i, i.find(symbol))):
+                                if self.goto(i, index) not in self.C:
+                                    self.C.append(self.goto(i, index))
                                     isChanged = True
             if not isChanged:
                 self.print_C()
                 break
 
-    def unique_state(self, state, list):
-        aux = False
-        for x in list:
-            for s in self.C:
-                if x in s:
-                    return False
-        return True
+    def unique_state(self, list):
+        for state in self.C:
+            if state == list:
+                return False
+            for el in state:
+                if el not in list:
+                    return True
+        return False
 
     def print_C(self):
         for state in self.C:
