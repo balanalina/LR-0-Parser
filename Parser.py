@@ -6,10 +6,15 @@ class Parser:
         self.grammar = grammar
         self.states = []
         self.C = []
+        self.table = {}
 
     def goto(self, state, symbol_index):
+        if symbol_index == -1:
+            return []
         symbol = state[symbol_index]
         if state[symbol_index - 1] != '.':
+            if state[len(state) - 1] == ".":
+                return self.closure(state)
             return []
         if state[symbol_index - 1] is '.':
             state = state.replace('.', '')
@@ -41,29 +46,36 @@ class Parser:
                         index = ind + len(i.split("->")[0]) + 2
                         if i[index] is not '.':
                             if self.goto(i, index):
-                                #if self.unique_state( self.goto(i, i.find(symbol))):
                                 if self.goto(i, index) not in self.C:
                                     self.C.append(self.goto(i, index))
                                     isChanged = True
             if not isChanged:
                 self.print_C()
+                self.createTable()
                 break
 
-    def unique_state(self, list):
+    def createTable(self):
         for state in self.C:
-            if state == list:
-                return False
-            for el in state:
-                if el not in list:
-                    return True
-        return False
+            self.table[tuple((self.C.index(state),"action"))] = "ok"
+        for state in self.C:
+            for i in state:
+                for ind in range(len(i.split("->")[1])):
+                    index = ind + len(i.split("->")[0]) + 2
+                    if self.goto(i, index):
+                        self.table[tuple((self.C.index(state),i[index]))] = "s" + str(self.C.index(self.goto(i,index)))
+                    else:
+                        self.table[tuple((self.C.index(state), i[index]))] = self.goto(i,index)
+        print(self.table)
 
     def print_C(self):
         for state in self.C:
-            s = "s" + str(self.C.index(state)) + "= "
+            s = "s" + str(self.C.index(state)) + "={ "
             for i in state:
-                s += i + " , "
-            print(s)
+                s += "\n" + i
+
+            print(s + " }\n")
+
+
 
     def menu(self):
         s = "0. Exit \n"
@@ -101,7 +113,6 @@ class Parser:
                 self.ColCan()
             else:
                 break
-
 
 gr = Grammar("Data/g1.in")
 g = Parser(gr)

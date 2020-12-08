@@ -9,6 +9,7 @@ class Grammar:
         self.production = {}
         self.file = file_name
         self.initial_state = None
+        self.reduce_states = []
         self.read_grammar()
 
     def read_grammar(self):
@@ -25,6 +26,8 @@ class Grammar:
             symbol = file_content[i].split('->')[0]
             productions = file_content[i].split('->')[1]
             productions = productions.split("|")
+            for state in productions:
+                self.reduce_states.append(state)
             self.production[symbol] = productions
 
 
@@ -39,6 +42,9 @@ class Grammar:
 
     def get_initial_state(self):
         return self.initial_state
+
+    def get_reduce_states(self):
+        return self.reduce_states
 
 
 #g = Grammar("Data/g1.in")
