@@ -8,6 +8,7 @@ class Grammar:
         self.terminal = []
         self.production = {}
         self.file = file_name
+        self.initial_state = None
         self.read_grammar()
 
     def read_grammar(self):
@@ -19,6 +20,8 @@ class Grammar:
         self.non_terminal = file_content[0].split(',')
         self.terminal = file_content[1].split(',')
         for i in range(2, len(file_content)):
+            if self.initial_state is None:
+                self.initial_state = file_content[i].split('->')[0]
             symbol = file_content[i].split('->')[0]
             productions = file_content[i].split('->')[1]
             productions = productions.split("|")
@@ -34,5 +37,8 @@ class Grammar:
     def get_production(self):
         return self.production
 
+    def get_initial_state(self):
+        return self.initial_state
 
-# g = Grammar("Data/g1.in")
+
+#g = Grammar("Data/g1.in")
