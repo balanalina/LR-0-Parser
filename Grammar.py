@@ -20,6 +20,7 @@ class Grammar:
             file_content.append(line.replace("\n", ""))
         self.non_terminal = file_content[0].split(',')
         self.terminal = file_content[1].split(',')
+        self.reduce_states.append(file_content[2].split('->')[0] +'\'->' + file_content[2].split('->')[0])
         for i in range(2, len(file_content)):
             if self.initial_state is None:
                 self.initial_state = file_content[i].split('->')[0]
@@ -27,7 +28,7 @@ class Grammar:
             productions = file_content[i].split('->')[1]
             productions = productions.split("|")
             for state in productions:
-                self.reduce_states.append(state)
+                self.reduce_states.append(symbol +'->'+state)
             self.production[symbol] = productions
 
 

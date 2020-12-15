@@ -52,8 +52,19 @@ class Parser:
                 self.createTable()
                 break
 
+    def checkReduce(self, s, i):
+        s = s[1]
+        state = self.C[int(s)][0]
+        state = state.replace('.','')
+        index = self.grammar.get_reduce_states().index(state)
+        if index == 0:
+            self.table[(i, "action")] = "accept"
+        else:
+            self.table[(i,"action")] = "reduce"+str(index)
+
+
     def createTable(self):
-        for i in range(0,len(self.C)):
+        for i in range(0, len(self.C)):
             self.table[(i, "action")] = None
         for state in self.C:
             for i in state:
@@ -64,26 +75,26 @@ class Parser:
                             self.table[tuple((self.C.index(state), i[index]))] = "s" + str(
                                 self.C.index(self.goto(i, index)))
                         else:
-                            self.table[tuple((self.C.index(state), i[index]))] = None #self.goto(i, index)
+                            self.table[tuple((self.C.index(state), i[index]))] = None  # self.goto(i, index)
         for i in range(0, len(self.C)):
             resulting_states = []
             for j in self.table.keys():
                 if j[0] == i and j[1] != "action":
                     resulting_states.append(self.table[j])
             for check in resulting_states:
-                if "s"+str(i) != check:
-                    self.table[(i,"action")] = "shift"
+                if "s" + str(i) != check:
+                    self.table[(i, "action")] = "shift"
                     break
-            if self.table[(i,"action")] != "shift":
-                 if resulting_states.count(resulting_states[0]) == len(resulting_states):
-                     self.table[(i, "action")] = "reduce"
-                     for j in self.table.keys():
+            if self.table[(i, "action")] != "shift":
+                if resulting_states.count(resulting_states[0]) == len(resulting_states):
+                    # self.table[(i, "action")] = "reduce"
+                    self.checkReduce(resulting_states[0],i)
+                    for j in self.table.keys():
                         if j[0] == i and j[1] != "action":
                             self.table[j] = None
-            print(resulting_states)
-        print(self.table)
-
-    
+        for i in range(0, len(self.C)):
+            if self.table[(i, "action")] is None:
+                self.table[(i, "action")] == "error"
 
     def print_C(self):
         for state in self.C:
@@ -127,6 +138,7 @@ class Parser:
                 print(prod + "\n")
             elif command == 5:
                 self.ColCan()
+                print(self.table)
             else:
                 break
 
