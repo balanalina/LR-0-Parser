@@ -1,3 +1,5 @@
+from prettytable import PrettyTable
+
 from Grammar import Grammar
 
 
@@ -96,6 +98,23 @@ class Parser:
             if self.table[(i, "action")] is None:
                 self.table[(i, "action")] == "error"
 
+    def prettyPrint(self):
+        all = self.grammar.get_non_terminals() + self.grammar.get_terminals()
+        x = PrettyTable(["states", "action"] + all)
+        for element in range(0, len(self.C)):
+            row = []
+            row.append("s" + str(element))
+            row.append(self.table[(element, "action")])
+            for a in all:
+                if (element, a) in self.table:
+                    row.append(self.table[(element, a)])
+                else:
+                    row.append("")
+            x.add_row(row)
+
+
+        print(x)
+
     def print_C(self):
         for state in self.C:
             s = "s" + str(self.C.index(state)) + "={ "
@@ -138,7 +157,7 @@ class Parser:
                 print(prod + "\n")
             elif command == 5:
                 self.ColCan()
-                print(self.table)
+                self.prettyPrint()
             else:
                 break
 
