@@ -12,9 +12,7 @@ class Parser:
         if symbol_index == -1:
             return []
         symbol = state[symbol_index]
-        if state[symbol_index - 1] != '.':
-            if state[len(state) - 1] == ".":
-                return self.closure(state)
+        if state[symbol_index - 1] != '.' and state[len(state) - 1] is not '.':
             return []
         if state[symbol_index - 1] is '.':
             state = state.replace('.', '')
@@ -31,8 +29,8 @@ class Parser:
             if symbol in self.grammar.get_non_terminals():
                 for i in self.grammar.get_production()[symbol]:
                     state.append(symbol + "->." + i)
-        if state[len(state) - 1] is '.':
-            return []
+        if len(state) == 1 and state[0][len(state[0]) - 1] is '.':
+            return [production]
         return state
 
     def ColCan(self):
@@ -55,16 +53,31 @@ class Parser:
                 break
 
     def createTable(self):
-        for state in self.C:
-            self.table[tuple((self.C.index(state),"action"))] = "ok"
+        for i in range(0,len(self.C)):
+            self.table[(i, "action")] = None
         for state in self.C:
             for i in state:
                 for ind in range(len(i.split("->")[1])):
                     index = ind + len(i.split("->")[0]) + 2
-                    if self.goto(i, index):
-                        self.table[tuple((self.C.index(state),i[index]))] = "s" + str(self.C.index(self.goto(i,index)))
-                    else:
-                        self.table[tuple((self.C.index(state), i[index]))] = self.goto(i,index)
+                    if i[index] is not '.':
+                        if self.goto(i, index):
+                            self.table[tuple((self.C.index(state), i[index]))] = "s" + str(
+                                self.C.index(self.goto(i, index)))
+                        else:
+                            self.table[tuple((self.C.index(state), i[index]))] = None #self.goto(i, index)
+        for i in range(0, len(self.C)):
+            resulting_states = []
+            for j in self.table.keys():
+                if j[0] == i and j[1] != "action":
+                    resulting_states.append(self.table[j])
+            for check in resulting_states:
+                if "s"+str(i) != check:
+                    self.table[(i,"action")] = "shift"
+                    break
+            if self.table[(i,"action")] != "shift":
+                 if resulting_states.count(resulting_states[0]) == len(resulting_states):
+                     self.table[(i, "action")] = "reduce"
+            print(resulting_states)
         print(self.table)
 
     def print_C(self):
@@ -74,8 +87,6 @@ class Parser:
                 s += "\n" + i
 
             print(s + " }\n")
-
-
 
     def menu(self):
         s = "0. Exit \n"
@@ -113,6 +124,7 @@ class Parser:
                 self.ColCan()
             else:
                 break
+
 
 gr = Grammar("Data/g1.in")
 g = Parser(gr)
