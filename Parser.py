@@ -77,8 +77,13 @@ class Parser:
             if self.table[(i,"action")] != "shift":
                  if resulting_states.count(resulting_states[0]) == len(resulting_states):
                      self.table[(i, "action")] = "reduce"
+                     for j in self.table.keys():
+                        if j[0] == i and j[1] != "action":
+                            self.table[j] = None
             print(resulting_states)
         print(self.table)
+
+    
 
     def print_C(self):
         for state in self.C:
