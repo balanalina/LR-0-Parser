@@ -54,6 +54,41 @@ class Parser:
                 self.createTable()
                 break
 
+    def checkSequence(self, seq):
+        self.ColCan()
+        self.prettyPrint()
+        reduces = self.grammar.get_reduce_states()[1:]
+        for index in range(len(reduces)):
+            reduces[index] = reduces[index].split("->")
+        list = ["s0"]
+        for el in seq:
+            list.append(el)
+            if (int(list[-2][1]), list[-1]) not in self.table.keys():
+                return False
+            list.append(self.table[(int(list[-2][1]), list[-1])])
+        print(list)
+        while True:
+            if self.table[(int(list[-1][1]), "action")] == "accept":
+                return True
+            reduceNr = int(self.table[(int(list[-1][1]), "action")][-1]) - 1
+            reduce = reduces[reduceNr]
+
+            if len(reduce[1]) == 1:
+                if reduce[1] == list[-2]:
+                    list = list[: len(list) - 2]
+                    list.append(reduce[0])
+                    list.append(self.table[(int(list[-2][1]), list[-1])])
+                else:
+                    return False
+            elif len(reduce[1]) == 2:
+                if reduce[1] == list[-4] + list[-2]:
+                    list = list[: len(list) - 4]
+                    list.append(reduce[0])
+                    list.append(self.table[(int(list[-2][1]), list[-1])])
+                else:
+                    return False
+
+        return False
     def checkReduce(self, s, i):
         s = s[1]
         state = self.C[int(s)][0]
@@ -66,6 +101,7 @@ class Parser:
 
 
     def createTable(self):
+        print(self.grammar.get_non_terminals())
         for i in range(0, len(self.C)):
             self.table[(i, "action")] = None
         for state in self.C:
@@ -76,8 +112,6 @@ class Parser:
                         if self.goto(i, index):
                             self.table[tuple((self.C.index(state), i[index]))] = "s" + str(
                                 self.C.index(self.goto(i, index)))
-                        else:
-                            self.table[tuple((self.C.index(state), i[index]))] = None  # self.goto(i, index)
         for i in range(0, len(self.C)):
             resulting_states = []
             for j in self.table.keys():
@@ -130,6 +164,7 @@ class Parser:
         s += "3. Set of productions \n"
         s += "4. Production for a given non_terminal \n"
         s += "5. Parse \n"
+        s += "6. Check sequence"
         return s
 
     def run(self):
@@ -148,6 +183,7 @@ class Parser:
                         prod += value + " | "
                     print(prod)
                 print("\n")
+                print(self.grammar.get_reduce_states())
             elif command == 4:
                 print("Enter non-terminal: ")
                 non_term = input()
@@ -158,6 +194,13 @@ class Parser:
             elif command == 5:
                 self.ColCan()
                 self.prettyPrint()
+            elif command == 6:
+                print("Enter the sequence: ")
+                seq = input()
+                if self.checkSequence(seq):
+                    print('Accepted')
+                else:
+                    print('Not accepted')
             else:
                 break
 
